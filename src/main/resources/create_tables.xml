@@ -8,6 +8,63 @@
         http://www.liquibase.org/xml/ns/dbchangelog-ext
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
+    <changeSet id="create_department" author="anton">
+        <createTable tableName="department">
+            <column name="id" type="serial" autoIncrement="true">
+                <constraints nullable="false" unique="true" primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create_type_lesson" author="anton">
+        <createTable tableName="type_lesson">
+            <column name="id" type="serial" autoIncrement="true">
+                <constraints nullable="false" unique="true" primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create_auditorium" author="anton">
+        <createTable tableName="auditorium">
+            <column name="id" type="serial" autoIncrement="true">
+                <constraints nullable="false" unique="true" primaryKey="true"/>
+            </column>
+            <column name="block" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="number" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="capacity" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="department_id" type="int">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="auditorium"
+                                 baseColumnNames="type_id"
+                                 constraintName="fk_auditorium_to_type_lesson"
+                                 referencedTableName="type_lesson"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="auditorium"
+                                 baseColumnNames="department_id"
+                                 constraintName="fk_auditorium_to_department"
+                                 referencedTableName="department"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
     <changeSet id="create_educator" author="anton">
         <createTable tableName="educator">
             <column name="id" type="serial" autoIncrement="true">
@@ -28,10 +85,196 @@
             <column name="working_days" type="varchar(10) []">
                 <constraints nullable="false"/>
             </column>
-            <!-- for further
             <column name="department_id" type="int">
                 <constraints nullable="true"/>
-            </column>-->
+            </column>
         </createTable>
+
+        <addForeignKeyConstraint baseTableName="educator"
+                                 baseColumnNames="department_id"
+                                 constraintName="fk_educator_to_department"
+                                 referencedTableName="department"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="create_subject" author="anton">
+        <createTable tableName="subject">
+            <column name="id" type="serial" autoIncrement="true">
+                <constraints nullable="false" unique="true" primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_lesson_two_weeks" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="combine" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="department_id" type="int">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="subject"
+                                 baseColumnNames="type_id"
+                                 constraintName="fk_subject_to_type_lesson"
+                                 referencedTableName="type_lesson"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="subject"
+                                 baseColumnNames="department_id"
+                                 constraintName="fk_subject_to_department"
+                                 referencedTableName="department"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="create_educator_subject" author="anton">
+        <createTable tableName="educator_subject">
+            <column name="educator_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="subject_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="educator_subject"
+                                 baseColumnNames="educator_id"
+                                 constraintName="fk_educator_subject_to_educator"
+                                 referencedTableName="educator"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="educator_subject"
+                                 baseColumnNames="subject_id"
+                                 constraintName="fk_educator_subject_to_subject"
+                                 referencedTableName="subject"
+                                 referencedColumnNames="id"/>
+
+        <addPrimaryKey tableName="educator_subject"
+                       columnNames="educator_id, subject_id"/>
+    </changeSet>
+
+    <changeSet id="create_student_group" author="anton">
+        <createTable tableName="student_group">
+            <column name="id" type="serial" autoIncrement="true">
+                <constraints nullable="false" unique="true" primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(8)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="quantity" type="int">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create_group_subject" author="anton">
+        <createTable tableName="group_subject">
+            <column name="group_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="subject_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="group_subject"
+                                 baseColumnNames="group_id"
+                                 constraintName="fk_group_subject_to_student_group"
+                                 referencedTableName="student_group"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="group_subject"
+                                 baseColumnNames="subject_id"
+                                 constraintName="fk_group_subject_to_subject"
+                                 referencedTableName="subject"
+                                 referencedColumnNames="id"/>
+
+        <addPrimaryKey tableName="group_subject"
+                       columnNames="group_id, subject_id"/>
+    </changeSet>
+
+    <changeSet id="create_timeslot" author="anton">
+        <createTable tableName="timeslot">
+            <column name="id" type="serial" autoIncrement="true">
+                <constraints nullable="false" unique="true" primaryKey="true"/>
+            </column>
+            <column name="even_week" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+            <column name="day_of_week" type="int">
+                <constraints nullable="false" checkConstraint="CHECK "/>
+            </column>
+            <column name="pair_number" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="start_time" type="time">
+                <constraints nullable="false"/>
+            </column>
+            <column name="end_time" type="time">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create_lesson" author="anton">
+        <createTable tableName="lesson">
+            <column name="id" type="serial" autoIncrement="true">
+                <constraints nullable="false" unique="true" primaryKey="true"/>
+            </column>
+            <column name="group_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="subject_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="educator_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="auditorium_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="timeslot_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint tableName="lesson"
+                             columnNames="group_id, timeslot_id"
+                             constraintName="unique_pare_group_and_timeslot"/>
+
+        <addForeignKeyConstraint baseTableName="lesson"
+                                 baseColumnNames="group_id"
+                                 constraintName="fk_lesson_to_student_group"
+                                 referencedTableName="student_group"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="lesson"
+                                 baseColumnNames="subject_id"
+                                 constraintName="fk_lesson_to_subject"
+                                 referencedTableName="subject"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="lesson"
+                                 baseColumnNames="educator_id"
+                                 constraintName="fk_lesson_to_educator"
+                                 referencedTableName="educator"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="lesson"
+                                 baseColumnNames="auditorium_id"
+                                 constraintName="fk_lesson_to_auditorium"
+                                 referencedTableName="auditorium"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="lesson"
+                                 baseColumnNames="timeslot_id"
+                                 constraintName="fk_lesson_to_timeslot"
+                                 referencedTableName="timeslot"
+                                 referencedColumnNames="id"/>
     </changeSet>
 </databaseChangeLog>
